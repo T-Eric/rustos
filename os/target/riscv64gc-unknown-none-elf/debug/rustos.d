@@ -1,0 +1,1 @@
+/home/teric/projects/rustos/os/target/riscv64gc-unknown-none-elf/debug/rustos: /home/teric/projects/rustos/os/src/console.rs /home/teric/projects/rustos/os/src/entry.asm /home/teric/projects/rustos/os/src/lang_items.rs /home/teric/projects/rustos/os/src/main.rs /home/teric/projects/rustos/os/src/sbi.rs

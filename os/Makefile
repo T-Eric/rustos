@@ -5,7 +5,7 @@ BIN := target/$(TARGET)/$(RUN_MODE)/os.bin
 
 PLATFORM := qemu-system-riscv64
 MACHINE := virt
-BOOTLOADER := bootloader/rustsbi-qemu.bin
+BOOTLOADER := ../bootloader/rustsbi-qemu.bin
 
 gen_bin:
 	cargo build

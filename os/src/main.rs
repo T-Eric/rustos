@@ -5,11 +5,17 @@ mod console;
 
 mod lang_items;
 mod sbi;
+mod batch;
+mod sync;
+mod trap;
+mod uart;
+
 use console::Log;
 use core::arch::global_asm;
 
 // fn main() {}
 global_asm!(include_str!("entry.asm"));
+global_asm!(include_str!("link_app.S"));// build.rs生成
 
 #[no_mangle]
 pub fn rust_main() -> ! {
@@ -30,5 +36,7 @@ fn clear_bss() {
         fn sbss();
         fn ebss();
     }
-    (sbss as usize..ebss as usize).for_each(|a| unsafe { (a as *mut u8).write_volatile(0) });
+    // (sbss as usize..ebss as usize).for_each(|a| unsafe { (a as *mut u8).write_volatile(0) });
+    unsafe{core::slice::from_raw_parts_mut(sbss as usize as *mut u8,ebss as usize-sbss as usize).fill(0)};
+    // 起始位置不能直接改*mut u8，因为函数返回值不能直接用
 }

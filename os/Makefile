@@ -1,11 +1,14 @@
 TARGET := riscv64gc-unknown-none-elf
 RUN_MODE := release
-ORIGIN := target/$(TARGET)/$(RUN_MODE)/rustos
+ORIGIN := target/$(TARGET)/$(RUN_MODE)/os
 BIN := target/$(TARGET)/$(RUN_MODE)/os.bin
 
 PLATFORM := qemu-system-riscv64
 MACHINE := virt
 BOOTLOADER := ../bootloader/rustsbi-qemu.bin
+
+build:
+
 
 gen_bin:
 	cargo build
@@ -19,4 +22,4 @@ run:
 run_debug:
 	$(PLATFORM) -machine $(MACHINE) -nographic -bios $(BOOTLOADER) -device loader,file=$(BIN),addr=0x80200000 -gdb tcp::3456 -S
 
-.PHONY: gen_bin run run_debug
+.PHONY: build gen_bin run run_debug

@@ -1,4 +1,4 @@
-use crate::sbi::shutdown;
+use crate::tesbi::sbi::shutdown;
 use crate::Log;
 use core::panic::PanicInfo;
 
@@ -13,7 +13,7 @@ fn panic(info: &PanicInfo) -> ! {
             info.message().as_str().unwrap()
         )
     } else {
-        println_info!(Log::Error,"Panicked: {}", info.message().as_str().unwrap())
+        println_info!(Log::Error, "Panicked: {}", info.message().as_str().unwrap())
     }
-    shutdown(true);
+    shutdown();
 }

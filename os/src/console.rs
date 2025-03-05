@@ -34,7 +34,9 @@ macro_rules! println {
 
 // log color macros
 
+#[allow(dead_code)]
 pub enum Log {
+    Panic,
     Error,
     Warning,
     Info,
@@ -46,6 +48,7 @@ pub enum Log {
 macro_rules! print_info {
     ($color: expr, $text:literal $(,$($arg: tt)+)?) => {
         match $color {
+            Log::Panic => $crate::console::print(format_args!(concat!("\x1b[95m", $text, "\x1b[0m") $(, $($arg)+)?)),
             Log::Error => $crate::console::print(format_args!(concat!("\x1b[31m", $text, "\x1b[0m") $(, $($arg)+)?)),
             Log::Warning => $crate::console::print(format_args!(concat!("\x1b[93m", $text, "\x1b[0m") $(, $($arg)+)?)),
             Log::Info => $crate::console::print(format_args!(concat!("\x1b[96m", $text, "\x1b[0m") $(, $($arg)+)?)),
@@ -58,9 +61,10 @@ macro_rules! print_info {
 macro_rules! println_info {
     ($color: expr, $text:literal $(,$($arg: tt)+)?) => {
         match $color {
-            Log::Error => $crate::console::print(format_args!(concat!("\x1b[31m[ERROR] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
-            Log::Warning => $crate::console::print(format_args!(concat!("\x1b[93m[WARNING] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
-            Log::Info => $crate::console::print(format_args!(concat!("\x1b[96m[INFO] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
+            Log::Panic => $crate::console::print(format_args!(concat!("\x1b[95m[Panic] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
+            Log::Error => $crate::console::print(format_args!(concat!("\x1b[31m[Error] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
+            Log::Warning => $crate::console::print(format_args!(concat!("\x1b[93m[Warning] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
+            Log::Info => $crate::console::print(format_args!(concat!("\x1b[96m[Info] ", $text, "\n\x1b[0m") $(, $($arg)+)?)),
             Log::Debug => $crate::console::print(format_args!(concat!("\x1b[32m", $text, "\n\x1b[0m") $(, $($arg)+)?)),
             Log::Trace => $crate::console::print(format_args!(concat!("\x1b[90m", $text, "\n\x1b[0m") $(, $($arg)+)?)),
         }

@@ -1,6 +1,5 @@
 use bitflags::bitflags;
 use core::hint::spin_loop;
-use core::ops::Add;
 use core::sync::atomic::{AtomicPtr, Ordering};
 use lazy_static::lazy_static;
 
@@ -105,7 +104,7 @@ impl SerialPort {
         }
     }
 
-    pub fn getchar(&mut self) -> u8 {
+    pub fn _getchar(&mut self) -> u8 {
         let rbr = self.rbr.load(Ordering::Relaxed);
         let lsr = self.lsr.load(Ordering::Relaxed);
         unsafe {
@@ -123,8 +122,4 @@ lazy_static! {
         uart.init();
         uart
     };
-}
-
-pub fn uart_init() {
-    lazy_static::initialize(&UART);
 }

@@ -10,7 +10,6 @@
     .globl __restore
     .align 2
 __alltraps:
-    # swap sp and sscratch, the stack pointer of user and super
     csrrw sp, sscratch, sp
     # now sp->kernel stack, sscratch->user stack
     # allocate a TrapContext on kernel stack

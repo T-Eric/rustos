@@ -3,7 +3,7 @@
 use std::fs::{read_dir, File};
 use std::io::{Result, Write};
 
-static TARGET_DIR: &str = "../user/target/riscv64gc-unknown-none-elf/release";
+static TARGET_DIR: &str = "../user/target/riscv64gc-unknown-none-elf/release/";
 
 fn main() {
     insert_app_data().unwrap();

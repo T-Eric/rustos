@@ -4,11 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
-sbi-rt = {version = "0.0.3",features = ["legacy"]}
+#riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
+riscv= {version =  "0.13.0" ,features = ["s-mode","riscv-macros"]}
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 bitflags = "2.8.0"
-volatile = "0.6.1"
 
 [profile.release]
 debug = true

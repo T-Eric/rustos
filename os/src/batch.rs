@@ -4,7 +4,7 @@ use crate::Log;
 use core::arch::asm;
 use lazy_static::lazy_static;
 
-const MAX_APP_NUM: usize = 1;
+const MAX_APP_NUM: usize = 16; // 不支持多道。。。
 const KERNEL_STACK_SIZE: usize = 4096 * 2;
 const USER_STACK_SIZE: usize = 4096 * 2;
 const APP_BASE_ADDRESS: usize = 0x80400000;
@@ -19,7 +19,7 @@ struct AppManager {
 }
 
 impl AppManager {
-    fn print_app_info(&self) {
+    pub fn print_app_info(&self) {
         println_info!(Log::Info, "[kernel] num of apps: {}", self.num_app);
         for i in 0..self.num_app {
             println_info!(
@@ -40,27 +40,30 @@ impl AppManager {
         self.current_app += 1;
     }
 
-    unsafe fn load_app(&self, id: usize) {
+    fn load_app(&self, id: usize) {
         if id >= self.num_app {
             panic!("All applications completed")
         }
         println_info!(Log::Info, "[kernel] Loading app_{}", id);
 
-        core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, APP_MAX_SIZE).fill(0);
+        unsafe {
+            core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, APP_MAX_SIZE).fill(0);
 
-        // from app's home to 0x80400000 dest
-        let app_src = core::slice::from_raw_parts(
-            self.app_start[id] as *const u8,
-            self.app_start[id + 1] - self.app_start[id],
-        );
-        let app_dst = core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, app_src.len());
-        app_dst.copy_from_slice(app_src);
-        // memory fence to sync i-cache and mem
-        asm!("fence.i");
+            // from app's home to 0x80400000 dest
+            let app_src = core::slice::from_raw_parts(
+                self.app_start[id] as *const u8,
+                self.app_start[id + 1] - self.app_start[id],
+            );
+            let app_dst =
+                core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, app_src.len());
+            app_dst.copy_from_slice(app_src);
+            // memory fence to sync i-cache and mem
+            asm!("fence.i");
+        }
     }
 }
 
-// AppManager的全局可借用实例初始化
+// AppManager的全局可借用实例，使用lazy_static先读取app信息再建立
 lazy_static! {
     static ref APP_MANAGER: UpSafeCell<AppManager> = unsafe { UpSafeCell::new({
         extern "C" { fn _num_app(); }
@@ -79,6 +82,31 @@ lazy_static! {
     })};
 }
 
+// AppManager初始化
+pub fn app_manager_init() {
+    // lazy_static::initialize(&APP_MANAGER);
+    APP_MANAGER.exclusive_access().print_app_info();
+}
+
+// run next app
+pub fn run_next_app() -> ! {
+    let mut app_manager = APP_MANAGER.exclusive_access();
+    let cur_app = app_manager.get_cur_app();
+    app_manager.load_app(cur_app);
+    app_manager.move_to_next_app();
+    drop(app_manager); //
+    unsafe extern "C" {
+        fn __restore(tc_addr: usize);
+    }
+    unsafe {
+        __restore(KERNEL_STACK.push_context(TrapContext::app_init_context(
+            APP_BASE_ADDRESS,
+            USER_STACK.get_sp(),
+        )) as *const _ as usize);
+    }
+    panic!("Reached unreachable code in batch::run_current_app!")
+}
+
 #[repr(align(4096))] // 保证align而不会中间断开出现“利用最大化”
 struct KernelStack {
     data: [u8; KERNEL_STACK_SIZE],
@@ -88,6 +116,14 @@ struct KernelStack {
 struct UserStack {
     data: [u8; USER_STACK_SIZE],
 }
+
+static KERNEL_STACK: KernelStack = KernelStack {
+    data: [0; KERNEL_STACK_SIZE],
+};
+
+static USER_STACK: UserStack = UserStack {
+    data: [0; USER_STACK_SIZE],
+};
 
 impl KernelStack {
     fn get_sp(&self) -> usize {

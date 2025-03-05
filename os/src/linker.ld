@@ -1,6 +1,7 @@
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
-BASE_ADDRESS = 0x80200000;
+BASE_ADDRESS = 0x80000000;
+RUST_MAIN_ADDRESS = 0x80200000;
 
 SECTIONS
 {
@@ -10,6 +11,11 @@ SECTIONS
     stext = .;
     .text : {
         *(.text.entry)
+    }
+
+    . = RUST_MAIN_ADDRESS;
+    .text.rust_main : {
+        *(.text.rust_main)
         *(.text .text.*)
     }
 

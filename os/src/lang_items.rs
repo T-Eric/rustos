@@ -6,14 +6,14 @@ use core::panic::PanicInfo;
 fn panic(info: &PanicInfo) -> ! {
     if let Some(location) = info.location() {
         println_info!(
-            Log::Error,
+            Log::Panic,
             "Panicked at {}:{} {}",
             location.file(),
             location.line(),
             info.message().as_str().unwrap()
         )
     } else {
-        println_info!(Log::Error, "Panicked: {}", info.message().as_str().unwrap())
+        println_info!(Log::Panic, "Panicked: {}", info.message().as_str().unwrap())
     }
     shutdown();
 }

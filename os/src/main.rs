@@ -1,10 +1,14 @@
+#![feature(raw_ref_op)]
+#![feature(alloc_error_handler)]
 #![no_std]
 #![no_main]
+extern crate alloc;
 #[macro_use]
 mod console;
-
 mod batch;
+mod config;
 mod lang_items;
+mod mem;
 mod sync;
 mod syscall;
 mod tesbi;

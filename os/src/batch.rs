@@ -1,14 +1,9 @@
+use crate::config::*;
 use crate::sync::UpSafeCell;
 use crate::trap::TrapContext;
 use crate::Log;
 use core::arch::asm;
 use lazy_static::lazy_static;
-
-const MAX_APP_NUM: usize = 16; // 不支持多道。。。
-const KERNEL_STACK_SIZE: usize = 4096 * 2;
-const USER_STACK_SIZE: usize = 4096 * 2;
-const APP_BASE_ADDRESS: usize = 0x80400000;
-const APP_MAX_SIZE: usize = 0x20000;
 
 // 保存应用数量和各自的位置信息，以及当前执行到第几个应用了。
 // 根据应用程序位置信息，初始化好应用所需内存空间，并加载应用执行。

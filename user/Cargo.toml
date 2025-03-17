@@ -3,8 +3,14 @@ name = "user_lib"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+crate-type = ["rlib"]
+bench = false
+test = false
+doctest = false
+
 [dependencies]
-riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
+riscv = "0.13.0"
 
 [profile.release]
 debug = true

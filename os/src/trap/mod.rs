@@ -1,6 +1,6 @@
 pub mod context;
 
-use core::arch::global_asm;
+use core::arch::{asm, global_asm};
 use riscv::interrupt::supervisor::Exception;
 use riscv::interrupt::Interrupt;
 use riscv::register::{
@@ -15,7 +15,7 @@ pub fn init() {
         fn __alltraps();
     }
     unsafe {
-        stvec::write(stvec::Stvec::from_bits(__alltraps as usize | 0b00));
+        stvec::write(stvec::Stvec::from_bits(__alltraps as usize));
         // stvec::write(__alltraps as usize, TrapMode::Direct);
     }
 }
@@ -31,18 +31,28 @@ pub fn trap_handler(tc: &mut TrapContext) -> &mut TrapContext {
             tc.x[10] = syscall(tc.x[17], [tc.x[10], tc.x[11], tc.x[12]]) as usize;
         }
         Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
-            println_info!(
-                Log::Error,
-                "[kernel] PageFault in app, kernel had to kill it."
-            );
-            run_next_app();
+            error_info!("[kernel] PageFault in app, kernel had to kill it.");
+            exit_cur_and_run_next();
         }
         Trap::Exception(Exception::IllegalInstruction) => {
-            println_info!(
-                Log::Error,
+            error_info!(
                 "[kernel] Illegal instruction appeared in app, kernel had no idea but to kill it."
             );
-            run_next_app();
+            exit_cur_and_run_next();
+        }
+        Trap::Interrupt(Interrupt::SupervisorTimer) => {
+            set_next_trigger();
+            suspend_cur_and_run_next();
+        }
+        Trap::Interrupt(Interrupt::SupervisorSoft) => {
+            // 又要我自己实现！？
+            let sip = riscv::register::sip::read().bits();
+            unsafe {
+                asm!("csrw sip, {sip}", sip = in(reg) sip ^ 2);
+            }
+            set_next_trigger();
+            // suspend_cur_and_run_next();
+            // todo 这个东西还不知道怎么实现，recore上的看不懂
         }
         _ => {
             panic!(
@@ -55,7 +65,8 @@ pub fn trap_handler(tc: &mut TrapContext) -> &mut TrapContext {
     tc
 }
 
-use crate::batch::run_next_app;
 use crate::console::Log;
 use crate::syscall::syscall;
+use crate::task::{exit_cur_and_run_next, suspend_cur_and_run_next};
+use crate::tesbi::timer::set_next_trigger;
 pub use context::TrapContext;

@@ -10,18 +10,28 @@ MACHINE := virt
 BOOTLOADER := none
 GDB := riscv64-unknown-elf-gdb
 
+build:
+	@cargo build
+	@-cargo run --release
+	@rust-objcopy --strip-all $(ORIGIN) -O binary $(BIN)
+	@stat $(BIN)
+
 gen_bin:
-	cargo build
-	-cargo run --release
-	rust-objcopy --strip-all $(ORIGIN) -O binary $(BIN)
-	stat $(BIN)
+	@cd ../user && make build
+	@cargo build
+	@-cargo run --release
+	@rust-objcopy --strip-all $(ORIGIN) -O binary $(BIN)
+	@stat $(BIN)
 
 run:
-	$(PLATFORM) -machine $(MACHINE) -nographic -bios $(BOOTLOADER) -device loader,file=$(BIN),addr=$(ENTRY_ADDR)
+	@$(PLATFORM) -machine $(MACHINE) -nographic -bios $(BOOTLOADER) -device loader,file=$(BIN),addr=$(ENTRY_ADDR)
 
 run_debug:
-	$(PLATFORM) -machine $(MACHINE) -nographic -bios $(BOOTLOADER) -device loader,file=$(BIN),addr=$(ENTRY_ADDR) -gdb tcp::3456 -S
+	@$(PLATFORM) -machine $(MACHINE) -nographic -bios $(BOOTLOADER) -device loader,file=$(BIN),addr=$(ENTRY_ADDR) -gdb tcp::3456 -S
 
 start_gdb:
-	$(GDB) \ -ex 'file $(ORIGIN)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:3456'
-.PHONY: gen_bin run run_debug start_gdb
+	@$(GDB) -ex 'file $(ORIGIN)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:3456'
+
+clean:
+	@cargo clean
+.PHONY: gen_bin run run_debug start_gdb clean

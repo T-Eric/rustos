@@ -58,6 +58,7 @@ macro_rules! print_info {
     };
 }
 
+#[macro_export]
 macro_rules! println_info {
     ($color: expr, $text:literal $(,$($arg: tt)+)?) => {
         match $color {
@@ -68,5 +69,40 @@ macro_rules! println_info {
             Log::Debug => $crate::console::print(format_args!(concat!("\x1b[32m", $text, "\n\x1b[0m") $(, $($arg)+)?)),
             Log::Trace => $crate::console::print(format_args!(concat!("\x1b[90m", $text, "\n\x1b[0m") $(, $($arg)+)?)),
         }
+    };
+}
+
+#[macro_export]
+macro_rules! error_info {
+    ($text:literal $(,$($arg: tt)+)?) => {
+        println_info!(Log::Error,$text $(,$($arg)+)?)
+    };
+}
+
+#[macro_export]
+macro_rules! debug_info {
+    ($text:literal $(,$($arg: tt)+)?) => {
+        println_info!(Log::Debug,$text $(,$($arg)+)?)
+    };
+}
+
+#[macro_export]
+macro_rules! info_info {
+    ($text:literal $(,$($arg: tt)+)?) => {
+        println_info!(Log::Info,$text $(,$($arg)+)?)
+    };
+}
+
+#[macro_export]
+macro_rules! warn_info {
+    ($text:literal $(,$($arg: tt)+)?) => {
+        println_info!(Log::Warning,$text $(,$($arg)+)?)
+    };
+}
+
+#[macro_export]
+macro_rules! trace_info {
+    ($text:literal $(,$($arg: tt)+)?) => {
+        println_info!(Log::Trace,$text $(,$($arg)+)?)
     };
 }

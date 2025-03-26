@@ -10,10 +10,10 @@ fn panic(info: &PanicInfo) -> ! {
             "Panicked at {}:{} {}",
             location.file(),
             location.line(),
-            info.message().as_str().unwrap()
+            info.message()
         )
     } else {
-        println_info!(Log::Panic, "Panicked: {}", info.message().as_str().unwrap())
+        println_info!(Log::Panic, "Panicked: {}", info.message())
     }
     shutdown();
 }

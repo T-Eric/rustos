@@ -1,12 +1,16 @@
-pub mod clock_interrupt;
 pub(crate) mod init;
 pub mod sbi;
+pub mod timer;
 pub mod uart;
 
 pub const VIRT_UART0_ADDRESS: usize = 0x10000000;
 pub const VIRT_TEST_ADDRESS: usize = 0x100000; // 关机地址
 const MTIME_BASE: usize = 0x0200bff8;
 const MTIMECMP_BASE: usize = 0x02004000;
+
+#[link_section = ".bss.stack"]
+#[no_mangle]
+static mut HART_ID: usize = 0;
 
 // 关机码用法：
 //     #[inline]

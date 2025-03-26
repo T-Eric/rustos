@@ -1,6 +1,7 @@
 # os/src/entry.asm
     .section .text.entry
     .globl _start
+    .align 2
 _start:
     la sp, boot_stack_top
     call boot_init

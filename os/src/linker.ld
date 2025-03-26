@@ -11,6 +11,7 @@ SECTIONS
     stext = .;
     .text : {
         *(.text.entry)
+        *(.text.interrupt)
     }
 
     . = RUST_MAIN_ADDRESS;
